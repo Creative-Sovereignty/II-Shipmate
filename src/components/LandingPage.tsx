@@ -71,7 +71,7 @@ export default function LandingPage({ onLaunchConsole }: LandingPageProps) {
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
           <button
-            onClick={onLaunchConsole}
+            onClick={() => onLaunchConsole()}
             className="w-full sm:w-auto bg-gold-shimmer hover:brightness-115 active:scale-97 text-[#000040] font-mono font-extrabold text-sm py-4 px-8 rounded-xl tracking-widest uppercase transition-all duration-150 hover:scale-[1.03] cursor-pointer flex items-center justify-center gap-3 shadow-[0_0_25px_rgba(212,175,55,0.45)]"
           >
             <Compass className="h-5 w-5 text-[#000040] animate-spin-slow" />
@@ -348,7 +348,7 @@ export default function LandingPage({ onLaunchConsole }: LandingPageProps) {
 
             <div className="pt-4 flex gap-3">
               <button
-                onClick={onLaunchConsole}
+                onClick={() => onLaunchConsole()}
                 className="bg-slate-900 hover:bg-slate-850 text-[#D4AF37] border border-slate-700 hover:border-[#D4AF37]/50 py-2 px-4 rounded text-[11px] font-mono uppercase font-black cursor-pointer transition-all flex items-center gap-1"
               >
                 <span>Interactive sandbox demo</span>
@@ -746,7 +746,7 @@ export default function LandingPage({ onLaunchConsole }: LandingPageProps) {
 
         <div className="pt-2">
           <button
-            onClick={onLaunchConsole}
+            onClick={() => onLaunchConsole()}
             className="bg-[#D4AF37] hover:bg-amber-500 text-[#000040] font-mono font-extrabold text-xs py-3.5 px-8 rounded-lg tracking-widest uppercase transition-all shadow-md active:scale-97 cursor-pointer"
           >
             Launch Interactive Playgrounds
