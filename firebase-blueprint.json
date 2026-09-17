@@ -1,0 +1,54 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with display name and metadata",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "The unique user identifier matching the Auth UID" },
+        "displayName": { "type": "string", "description": "The user's display name" },
+        "photoURL": { "type": "string", "description": "Avatar image web link" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Modification date-time" }
+      },
+      "required": ["userId", "displayName", "updatedAt"]
+    },
+    "UserPrivateData": {
+      "title": "UserPrivateData",
+      "description": "Isolate user sensitive PII email securely",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email", "description": "User email address" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "updatedAt"]
+    },
+    "BackupInstance": {
+      "title": "BackupInstance",
+      "description": "Encrypted or hashed codebase backups stored by the user",
+      "type": "object",
+      "properties": {
+        "backupId": { "type": "string", "description": "Unique identifier of the backup container" },
+        "userId": { "type": "string", "description": "Owner of the backup payload" },
+        "name": { "type": "string", "description": "Descriptive human label" },
+        "appConfig": { "type": "string", "description": "Comprehensive stringified config and layout state" },
+        "checksum": { "type": "string", "description": "SHA-256 integrity block marker to ensure zero corruption" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["backupId", "userId", "name", "appConfig", "checksum", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "The public profile matching authorization identifier"
+    },
+    "/users/{userId}/private/pii": {
+      "schema": "UserPrivateData",
+      "description": "Private PII container for isolated emails"
+    },
+    "/backups/{backupId}": {
+      "schema": "BackupInstance",
+      "description": "User specific secure uncorrupted backup snapshots"
+    }
+  }
+}

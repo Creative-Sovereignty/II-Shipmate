@@ -1,0 +1,6 @@
+{
+  "name": "Starboard & Shipmate Workspace",
+  "description": "High-fidelity interactive terminal for auditing Starboard compliance guardrails, calculating fee structures, and running the Shipmate pipeline.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

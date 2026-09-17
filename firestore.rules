@@ -1,0 +1,98 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Reset Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Shared global helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && (request.auth.token.email_verified == true || request.auth.token.firebase.sign_in_provider == 'anonymous');
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // 2. Entity validation functions for users & backups
+    function isValidUserProfile(data) {
+      return data.keys().hasAll(['userId', 'displayName', 'photoURL', 'updatedAt']) 
+        && data.keys().size() == 4
+        && data.userId == request.auth.uid
+        && data.displayName is string
+        && data.displayName.size() > 0
+        && data.displayName.size() <= 100
+        && data.photoURL is string
+        && data.photoURL.size() <= 1000
+        && data.updatedAt == request.time;
+    }
+
+    function isValidUserPrivateData(data) {
+      return data.keys().hasAll(['email', 'updatedAt'])
+        && data.keys().size() == 2
+        && data.email is string
+        && data.email.size() > 0
+        && data.email.size() <= 256
+        && data.updatedAt == request.time;
+    }
+
+    function isValidBackup(data) {
+      return data.keys().hasAll(['backupId', 'userId', 'name', 'appConfig', 'checksum', 'createdAt'])
+        && data.keys().size() == 6
+        && data.backupId is string
+        && data.backupId.size() <= 128
+        && data.userId == request.auth.uid
+        && data.name is string
+        && data.name.size() > 0
+        && data.name.size() <= 100
+        && data.appConfig is string
+        && data.appConfig.size() <= 1000000 
+        && data.checksum is string
+        && data.checksum.size() == 64 
+        && data.createdAt == request.time;
+    }
+
+    // 3. User Profile Rules
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUserProfile(request.resource.data);
+      allow update: if isOwner(userId) 
+        && isValidUserProfile(request.resource.data)
+        && request.resource.data.userId == resource.data.userId; 
+      allow delete: if false; 
+
+      match /private/pii {
+        allow get: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidUserPrivateData(request.resource.data);
+        allow delete: if false;
+      }
+    }
+
+    // 4. Backup Rules
+    match /backups/{backupId} {
+      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid; 
+      allow create: if isSignedIn() 
+        && request.resource.data.userId == request.auth.uid
+        && isValidId(backupId) 
+        && request.resource.data.backupId == backupId
+        && isValidBackup(request.resource.data);
+      allow update: if isSignedIn() 
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.backupId == resource.data.backupId
+        && isValidBackup(request.resource.data)
+        && request.resource.data.createdAt == resource.data.createdAt; 
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+  }
+}
